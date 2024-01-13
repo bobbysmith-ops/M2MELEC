@@ -13,10 +13,14 @@ import {
   TouchableOpacity,
   NativeEventEmitter,
   PermissionsAndroid,
+  Button,
 } from 'react-native';
 
 import BleManager from 'react-native-ble-manager';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+
+
+var Buffer = require('buffer/').Buffer
 
 const BleManagerModule = NativeModules.BleManager;
 const BleManagerEmitter = new NativeEventEmitter(BleManagerModule);
@@ -76,13 +80,22 @@ const App = () => {
     console.log('BleManager initialized');
     handleGetConnectedDevices();
     //startConnection();
-    startScan(); //commented before
-    //startConnection();
+    //startScan(); //commented before
+    startConnection();
     //collectServices();
-    //readData();
+    readData();
     
     //disconnectDevice();
     })
+    
+    //
+    //
+    //
+    //
+    //
+    
+    
+    
 
     // turn on bluetooth if it is not on
 
@@ -172,6 +185,15 @@ const App = () => {
     //   },
     // );
 
+
+
+    // Set interval to execute the readData function every x milliseconds 
+    const intervalId = setInterval(readData, 100);
+
+    // Cleanup function to clear the interval when the component unmounts
+    return () => {
+      clearInterval(intervalId);
+    };
 
 
   }, []);//'END OF USEEFFECT HOOK
@@ -272,12 +294,22 @@ const App = () => {
     BleManager.read("A8:42:E3:4C:8C:96","4fafc201-1fb5-459e-8fcc-c5c9c331914b","beb5483e-36e1-4688-b7f5-ea07361b26a8").then((readData) => {
       console.log("Read: " + readData)
       console.log("converting")
-      //const buffer = Buffer.from(readData)
-      //const sensorData = buffer.readUInt8()
-      //console.log(sensorData)
+      console.log(readData)
+
+
+
+
+      const buffer = Buffer.from(readData)
+      const sensorData = buffer.readUInt8()
+      //const sensorData = buffer.readUInt16()
+      console.log("cleaned data taken from buffer...")
+      console.log(sensorData)
     })
   }
-
+  //
+  //
+  //
+  //
 
   const disconnectDevice = () => {
     BleManager.disconnect("A8:42:E3:4C:8C:96").then(() => {
@@ -318,7 +350,16 @@ const App = () => {
               {isScanning ? 'Scanning...' : 'Scan Bluetooth Devices'}
             </Text>
           </TouchableOpacity>
+
+          <TouchableOpacity activeOpacity={0.5} style={styles.buttonStyle} onPress={readData}>
+            <Text style={styles.buttonTextStyle}>
+              Read Bluetooth Data
+            </Text>
+          </TouchableOpacity>
+
         </View>
+
+        
       </ScrollView>
     </SafeAreaView>
   );
